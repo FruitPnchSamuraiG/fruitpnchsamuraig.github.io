@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRIDAY Letter Grid</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(120, 1fr);
+            grid-template-rows: repeat(50, 1fr);
+            gap: 2px;
+            background: #000;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #606060;
+            background: #000;
+            cursor: pointer;
+            transition: color 0.1s ease;
+        }
+        
+        .center-block {
+            color: #FFFFFF !important;
+            font-style: italic;
+            text-shadow: 0 0 10px #FFFFFF;
+        }
+        
+        .coming-soon {
+            color: #FFFFFF !important;
+            font-style: normal;
+            text-shadow: 0 0 10px #FFFFFF;
+        }
+        
+        .cursor-highlight {
+            transition: color 0.1s ease;
+        }
+        
+        .highlighted {
+            text-shadow: 0 0 5px currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container" id="grid"></div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const gridWidth = 120;
+        const gridHeight = 50; // More rows for full screen height
+        const totalCells = gridWidth * gridHeight;
+        const centerRow = Math.floor(gridHeight / 2);
+        const centerCol = Math.floor(gridWidth / 2);
+        
+        // Letters to include
+        const hridayLetters = ['H', 'R', 'I', 'D', 'A', 'Y'];
+        const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        
+        // Rainbow colors
+        const rainbowColors = [
+            '#00BFFF', // Electric blue
+            '#00FF00', // Bright green
+            '#FF1493', // Hot pink
+            '#FF8C00', // Orange
+            '#9400D3', // Purple
+            '#FF0000', // Red
+            '#FFD700', // Yellow
+            '#00FFFF'  // Cyan
+        ];
+        
+        // Generate grid with alternating HRI/DAY rows
+        function generateGrid() {
+            const letters = [];
+            
+            // Fill grid row by row
+            for (let row = 0; row < gridHeight; row++) {
+                for (let col = 0; col < gridWidth; col++) {
+                    if (row % 2 === 0) {
+                        // Even rows: H R I repeating
+                        const hriPattern = ['H', 'R', 'I'];
+                        letters.push(hriPattern[col % 3]);
+                    } else {
+                        // Odd rows: D A Y repeating
+                        const dayPattern = ['D', 'A', 'Y'];
+                        letters.push(dayPattern[col % 3]);
+                    }
+                }
+            }
+            
+            return letters;
+        }
+        
+        // Select 30% of non-center cells for flashing (excluding "Coming Soon" text)
+        function selectFlashingCells() {
+            const excludedPositions = [];
+            const centerStartCol = Math.floor(gridWidth / 2) - 1;
+            const centerRowTop = Math.floor(gridHeight / 2) - 1;
+            const centerRowBottom = Math.floor(gridHeight / 2);
+            
+            // Mark center HRI/DAY block positions
+            for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
+                excludedPositions.push(centerRowTop * gridWidth + col); // HRI row
+                excludedPositions.push(centerRowBottom * gridWidth + col); // DAY row
+            }
+            
+            // Mark "Coming Soon" positions
+            const bottomRow = gridHeight - 5;
+            const comingSoonText = "COMING SOON";
+            const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
+            for (let col = textStartCol; col < textStartCol + comingSoonText.length; col++) {
+                excludedPositions.push(bottomRow * gridWidth + col);
+            }
+            
+            const availableCells = totalCells - excludedPositions.length;
+            const numFlashing = Math.floor(availableCells * 0.3); // 30% of available cells
+            const positions = [];
+            
+            while (positions.length < numFlashing) {
+                const pos = Math.floor(Math.random() * totalCells);
+                if (!positions.includes(pos) && !excludedPositions.includes(pos)) {
+                    positions.push(pos);
+                }
+            }
+            
+            return positions;
+        }
+        
+        // Create the grid with center white block and bottom "Coming Soon"
+        function createGrid() {
+            const letters = generateGrid();
+            
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = letters[i];
+                cell.dataset.index = i;
+                cell.dataset.originalColor = '#606060';
+                
+                // Calculate row and column
+                const row = Math.floor(i / gridWidth);
+                const col = i % gridWidth;
+                
+                // Check if this is part of the center 3x2 block (HRI on top, DAY below)
+                const centerStartCol = centerCol - 1; // Start 1 column left of center
+                
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || // HRI row
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {     // DAY row
+                    cell.classList.add('center-block');
+                    cell.dataset.originalColor = '#FFFFFF';
+                    
+                    // Set specific letters for center block
+                    if (row === centerRow - 1) { // HRI row
+                        if (col === centerStartCol) cell.textContent = 'H';
+                        else if (col === centerStartCol + 1) cell.textContent = 'R';
+                        else if (col === centerStartCol + 2) cell.textContent = 'I';
+                    } else { // DAY row
+                        if (col === centerStartCol) cell.textContent = 'D';
+                        else if (col === centerStartCol + 1) cell.textContent = 'A';
+                        else if (col === centerStartCol + 2) cell.textContent = 'Y';
+                    }
+                }
+                
+                // Check if this is part of the bottom "Coming Soon" text
+                const bottomRow = gridHeight - 5; // 5 rows from bottom
+                const comingSoonText = "COMING SOON";
+                const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
+                
+                if (row === bottomRow && col >= textStartCol && col < textStartCol + comingSoonText.length) {
+                    cell.classList.add('coming-soon');
+                    cell.dataset.originalColor = '#FFFFFF';
+                    cell.textContent = comingSoonText[col - textStartCol];
+                }
+                
+                grid.appendChild(cell);
+            }
+        }
+        
+        // Add random flashing animation to selected 30% of gray letters
+        function addFlashingEffect() {
+            const flashingPositions = selectFlashingCells();
+            const allCells = document.querySelectorAll('.cell');
+            
+            flashingPositions.forEach(position => {
+                const cell = allCells[position];
+                if (cell && !cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                    const randomDelay = Math.random() * 5000;
+                    
+                    setTimeout(() => {
+                        setInterval(() => {
+                            // 15% chance to flash
+                            if (Math.random() < 0.15) {
+                                const randomColor = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
+                                const originalColor = cell.dataset.originalColor;
+                                
+                                cell.style.color = randomColor;
+                                cell.style.textShadow = `0 0 5px ${randomColor}`;
+                                
+                                setTimeout(() => {
+                                    // Only reset if color hasn't been changed by other interactions
+                                    if (cell.style.color === randomColor) {
+                                        cell.style.color = originalColor;
+                                        cell.style.textShadow = 'none';
+                                    }
+                                }, 200 + Math.random() * 300);
+                            }
+                        }, 800 + Math.random() * 1200); // Longer intervals between flashes
+                    }, randomDelay);
+                }
+            });
+        }
+        
+        // Initialize features
+        createGrid();
+        setTimeout(() => {
+            addFlashingEffect();
+            addClickInteraction();
+        }, 500);
+        
+        // Add simple click interaction for center HRI/DAY block only
+        function addClickInteraction() {
+            const allCells = document.querySelectorAll('.cell');
+            
+            // Only add click event to HRI/DAY center block (not Coming Soon)
+            allCells.forEach(cell => {
+                const index = parseInt(cell.dataset.index);
+                const row = Math.floor(index / gridWidth);
+                const col = index % gridWidth;
+                const centerStartCol = centerCol - 1;
+                
+                // Check if this is part of the center HRI/DAY block only
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || // HRI row
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {     // DAY row
+                    
+                    cell.addEventListener('click', () => {
+                        // Make all letters white instantly (except Coming Soon)
+                        allCells.forEach(targetCell => {
+                            const targetIndex = parseInt(targetCell.dataset.index);
+                            const targetRow = Math.floor(targetIndex / gridWidth);
+                            const bottomRow = gridHeight - 5;
+                            
+                            // Don't affect Coming Soon text or center HRI/DAY block
+                            if (targetCell.classList.contains('center-block') || targetCell.classList.contains('coming-soon')) {
+                                return;
+                            }
+                                targetCell.style.color = '#FFFFFF';
+                                targetCell.style.textShadow = '0 0 5px #FFFFFF';
+                        });
+                        
+                        // Return to original colors after 1 second
+                        setTimeout(() => {
+                            allCells.forEach(targetCell => {
+                                if (!targetCell.classList.contains('center-block') && !targetCell.classList.contains('coming-soon')) {
+                                    targetCell.style.color = targetCell.dataset.originalColor;
+                                    targetCell.style.textShadow = 'none';
+                                }
+                            });
+                        }, 1000);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>M

@@ -12,7 +12,9 @@
             font-family: 'Courier New', monospace;
             width: 100vw;
             height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             overflow: hidden;
+            position: fixed; /* Prevent scrolling issues */
         }
         
         .grid-container {
@@ -21,7 +23,10 @@
             background: #000;
             width: 100vw;
             height: 100vh;
+            height: 100dvh; /* Dynamic viewport height */
             position: relative;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
         }
         
         .cell {
@@ -33,7 +38,8 @@
             background: #000;
             cursor: pointer;
             transition: color 0.1s ease;
-            font-size: clamp(6px, 2vw, 12px);
+            font-size: clamp(4px, 1.8vw, 12px);
+            min-height: 0;
         }
         
         .center-block {
@@ -61,30 +67,36 @@
     <div class="grid-container" id="grid"></div>
 
     <script>
-        // Calculate responsive grid dimensions
+        // Calculate responsive grid dimensions with better mobile handling
         function calculateGridDimensions() {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
+            const availableHeight = window.visualViewport ? window.visualViewport.height : screenHeight;
             
             let gridWidth, gridHeight;
             
             if (screenWidth <= 480) {
-                // Mobile phones
-                gridWidth = Math.max(30, Math.floor(screenWidth / 12));
-                gridHeight = Math.max(25, Math.floor(screenHeight / 16));
+                // Mobile phones - more conservative sizing
+                gridWidth = Math.max(20, Math.floor(screenWidth / 15));
+                gridHeight = Math.max(20, Math.floor(availableHeight / 20));
             } else if (screenWidth <= 768) {
                 // Tablets
-                gridWidth = Math.floor(screenWidth / 10);
-                gridHeight = Math.floor(screenHeight / 15);
+                gridWidth = Math.floor(screenWidth / 12);
+                gridHeight = Math.floor(availableHeight / 18);
             } else {
                 // Desktop
                 gridWidth = 120;
                 gridHeight = 50;
             }
             
-            // Ensure minimum dimensions for HRIDAY display
-            gridWidth = Math.max(gridWidth, 10);
-            gridHeight = Math.max(gridHeight, 10);
+            // Ensure minimum dimensions and account for safe areas on mobile
+            gridWidth = Math.max(gridWidth, 15);
+            gridHeight = Math.max(gridHeight, 15);
+            
+            // For very small screens, reduce further to ensure "Coming Soon" is visible
+            if (screenHeight < 600) {
+                gridHeight = Math.max(12, Math.floor(gridHeight * 0.8));
+            }
             
             return { gridWidth, gridHeight };
         }
@@ -112,26 +124,13 @@
         
         // Separate color arrays for different effects
         const flashingColors = [
-            '#00BFFF', // Electric blue
-            '#00FF00', // Bright green
-            '#FF1493', // Hot pink
-            '#FF8C00', // Orange
-            '#9400D3', // Purple
-            '#FF0000', // Red
-            '#FFD700', // Yellow
-            '#00FFFF'  // Cyan
+            '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
+            '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
         ];
         
         const clickColors = [
-            '#00BFFF', // Electric blue
-            '#00FF00', // Bright green
-            '#FF1493', // Hot pink
-            '#FF8C00', // Orange
-            '#9400D3', // Purple
-            '#FF0000', // Red
-            '#FFD700', // Yellow
-            '#00FFFF', // Cyan
-            '#606060'  // Gray
+            '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
+            '#9400D3', '#FF0000', '#FFD700', '#00FFFF', '#606060'
         ];
         
         // Generate grid with alternating HRI/DAY rows
@@ -161,24 +160,26 @@
             const centerRowBottom = Math.floor(gridHeight / 2);
             
             for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
-                excludedPositions.push(centerRowTop * gridWidth + col);
-                excludedPositions.push(centerRowBottom * gridWidth + col);
+                if (col >= 0 && col < gridWidth) {
+                    excludedPositions.push(centerRowTop * gridWidth + col);
+                    excludedPositions.push(centerRowBottom * gridWidth + col);
+                }
             }
             
-            const bottomRow = gridHeight - 3; // Adjusted for smaller screens
+            // Better "Coming Soon" positioning - ensure it's visible
+            const bottomRow = Math.max(0, gridHeight - 2); // Only 2 rows from bottom
             const comingSoonText = "COMING SOON";
-            const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
-            for (let col = textStartCol; col < textStartCol + comingSoonText.length; col++) {
-                if (col >= 0 && col < gridWidth) {
-                    excludedPositions.push(bottomRow * gridWidth + col);
-                }
+            const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
+            
+            for (let col = textStartCol; col < Math.min(textStartCol + comingSoonText.length, gridWidth); col++) {
+                excludedPositions.push(bottomRow * gridWidth + col);
             }
             
             const availableCells = totalCells - excludedPositions.length;
             const numFlashing = Math.floor(availableCells * 0.3);
             const positions = [];
             
-            while (positions.length < numFlashing) {
+            while (positions.length < numFlashing && positions.length < availableCells) {
                 const pos = Math.floor(Math.random() * totalCells);
                 if (!positions.includes(pos) && !excludedPositions.includes(pos)) {
                     positions.push(pos);
@@ -201,10 +202,11 @@
                 
                 const row = Math.floor(i / gridWidth);
                 const col = i % gridWidth;
-                const centerStartCol = centerCol - 1;
+                const centerStartCol = Math.max(0, centerCol - 1);
                 
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
+                // Center HRIDAY block
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1)) || 
+                    (row === centerRow && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1))) {
                     cell.classList.add('center-block');
                     cell.dataset.originalColor = '#FFFFFF';
                     
@@ -219,11 +221,12 @@
                     }
                 }
                 
-                const bottomRow = gridHeight - 3;
+                // Coming Soon text - positioned more safely
+                const bottomRow = Math.max(0, gridHeight - 2);
                 const comingSoonText = "COMING SOON";
-                const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
+                const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
                 
-                if (row === bottomRow && col >= textStartCol && col < textStartCol + comingSoonText.length && col >= 0 && col < gridWidth) {
+                if (row === bottomRow && col >= textStartCol && col < Math.min(textStartCol + comingSoonText.length, gridWidth)) {
                     cell.classList.add('coming-soon');
                     cell.dataset.originalColor = '#FFFFFF';
                     cell.textContent = comingSoonText[col - textStartCol];
@@ -293,7 +296,7 @@
             });
         }
         
-        // Modified click interaction with flashing pause/restart
+        // Modified click interaction
         function addClickInteraction() {
             const allCells = document.querySelectorAll('.cell');
             
@@ -301,24 +304,18 @@
                 const index = parseInt(cell.dataset.index);
                 const row = Math.floor(index / gridWidth);
                 const col = index % gridWidth;
-                const centerStartCol = centerCol - 1;
+                const centerStartCol = Math.max(0, centerCol - 1);
                 
-                // Only add click event to HRI/DAY center block
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1)) || 
+                    (row === centerRow && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1))) {
                     
                     cell.addEventListener('click', () => {
-                        // Stop all flashing immediately
                         isClickEffectActive = true;
                         clearAllFlashing();
-                        
-                        // Reset all cells to original state first
                         resetAllCellsToOriginal();
                         
-                        // Apply click color IMMEDIATELY (no setTimeout delay)
                         const randomColor = clickColors[Math.floor(Math.random() * clickColors.length)];
                         
-                        // Apply the random color to all gray letters instantly
                         allCells.forEach(targetCell => {
                             if (!targetCell.classList.contains('center-block') && 
                                 !targetCell.classList.contains('coming-soon')) {
@@ -327,19 +324,13 @@
                             }
                         });
                         
-                        // After the click effect duration, reset and restart flashing
                         setTimeout(() => {
-                            // Reset to original gray state
                             resetAllCellsToOriginal();
-                            
-                            // Mark click effect as finished
                             isClickEffectActive = false;
                             
-                            // Restart flashing after a short delay
                             setTimeout(() => {
                                 addFlashingEffect();
                             }, 100);
-                            
                         }, 1000);
                     });
                 }
@@ -353,12 +344,24 @@
             addClickInteraction();
         }, 500);
         
-        // Handle screen rotation/resize
+        // Better resize handling
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            setTimeout(() => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
                 location.reload();
-            }, 100);
+            }, 300);
         });
+        
+        // Handle viewport changes on mobile
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    location.reload();
+                }, 300);
+            });
+        }
     </script>
 </body>
 </html>

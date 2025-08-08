@@ -65,17 +65,21 @@
     <script>
         const grid = document.getElementById('grid');
         const gridWidth = 120;
-        const gridHeight = 50; // More rows for full screen height
+        const gridHeight = 50;
         const totalCells = gridWidth * gridHeight;
         const centerRow = Math.floor(gridHeight / 2);
         const centerCol = Math.floor(gridWidth / 2);
+        
+        // Control variables for flashing state
+        let flashingIntervals = [];
+        let isClickEffectActive = false;
         
         // Letters to include
         const hridayLetters = ['H', 'R', 'I', 'D', 'A', 'Y'];
         const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         
-        // Rainbow colors
-        const rainbowColors = [
+        // Separate color arrays for different effects
+        const flashingColors = [
             '#00BFFF', // Electric blue
             '#00FF00', // Bright green
             '#FF1493', // Hot pink
@@ -86,19 +90,28 @@
             '#00FFFF'  // Cyan
         ];
         
+        const clickColors = [
+            '#00BFFF', // Electric blue
+            '#00FF00', // Bright green
+            '#FF1493', // Hot pink
+            '#FF8C00', // Orange
+            '#9400D3', // Purple
+            '#FF0000', // Red
+            '#FFD700', // Yellow
+            '#00FFFF', // Cyan
+            '#606060'  // Gray
+        ];
+        
         // Generate grid with alternating HRI/DAY rows
         function generateGrid() {
             const letters = [];
             
-            // Fill grid row by row
             for (let row = 0; row < gridHeight; row++) {
                 for (let col = 0; col < gridWidth; col++) {
                     if (row % 2 === 0) {
-                        // Even rows: H R I repeating
                         const hriPattern = ['H', 'R', 'I'];
                         letters.push(hriPattern[col % 3]);
                     } else {
-                        // Odd rows: D A Y repeating
                         const dayPattern = ['D', 'A', 'Y'];
                         letters.push(dayPattern[col % 3]);
                     }
@@ -108,20 +121,18 @@
             return letters;
         }
         
-        // Select 30% of non-center cells for flashing (excluding "Coming Soon" text)
+        // Select 30% of non-center cells for flashing
         function selectFlashingCells() {
             const excludedPositions = [];
             const centerStartCol = Math.floor(gridWidth / 2) - 1;
             const centerRowTop = Math.floor(gridHeight / 2) - 1;
             const centerRowBottom = Math.floor(gridHeight / 2);
             
-            // Mark center HRI/DAY block positions
             for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
-                excludedPositions.push(centerRowTop * gridWidth + col); // HRI row
-                excludedPositions.push(centerRowBottom * gridWidth + col); // DAY row
+                excludedPositions.push(centerRowTop * gridWidth + col);
+                excludedPositions.push(centerRowBottom * gridWidth + col);
             }
             
-            // Mark "Coming Soon" positions
             const bottomRow = gridHeight - 5;
             const comingSoonText = "COMING SOON";
             const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
@@ -130,7 +141,7 @@
             }
             
             const availableCells = totalCells - excludedPositions.length;
-            const numFlashing = Math.floor(availableCells * 0.3); // 30% of available cells
+            const numFlashing = Math.floor(availableCells * 0.3);
             const positions = [];
             
             while (positions.length < numFlashing) {
@@ -143,7 +154,7 @@
             return positions;
         }
         
-        // Create the grid with center white block and bottom "Coming Soon"
+        // Create the grid
         function createGrid() {
             const letters = generateGrid();
             
@@ -154,32 +165,27 @@
                 cell.dataset.index = i;
                 cell.dataset.originalColor = '#606060';
                 
-                // Calculate row and column
                 const row = Math.floor(i / gridWidth);
                 const col = i % gridWidth;
+                const centerStartCol = centerCol - 1;
                 
-                // Check if this is part of the center 3x2 block (HRI on top, DAY below)
-                const centerStartCol = centerCol - 1; // Start 1 column left of center
-                
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || // HRI row
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {     // DAY row
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
                     cell.classList.add('center-block');
                     cell.dataset.originalColor = '#FFFFFF';
                     
-                    // Set specific letters for center block
-                    if (row === centerRow - 1) { // HRI row
+                    if (row === centerRow - 1) {
                         if (col === centerStartCol) cell.textContent = 'H';
                         else if (col === centerStartCol + 1) cell.textContent = 'R';
                         else if (col === centerStartCol + 2) cell.textContent = 'I';
-                    } else { // DAY row
+                    } else {
                         if (col === centerStartCol) cell.textContent = 'D';
                         else if (col === centerStartCol + 1) cell.textContent = 'A';
                         else if (col === centerStartCol + 2) cell.textContent = 'Y';
                     }
                 }
                 
-                // Check if this is part of the bottom "Coming Soon" text
-                const bottomRow = gridHeight - 5; // 5 rows from bottom
+                const bottomRow = gridHeight - 5;
                 const comingSoonText = "COMING SOON";
                 const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
                 
@@ -193,8 +199,30 @@
             }
         }
         
-        // Add random flashing animation to selected 30% of gray letters
+        // Function to clear all flashing intervals
+        function clearAllFlashing() {
+            flashingIntervals.forEach(interval => {
+                clearInterval(interval);
+                clearTimeout(interval);
+            });
+            flashingIntervals = [];
+        }
+        
+        // Function to reset all cells to original gray state
+        function resetAllCellsToOriginal() {
+            const allCells = document.querySelectorAll('.cell');
+            allCells.forEach(cell => {
+                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                    cell.style.color = cell.dataset.originalColor;
+                    cell.style.textShadow = 'none';
+                }
+            });
+        }
+        
+        // Modified flashing effect that can be stopped and restarted
         function addFlashingEffect() {
+            clearAllFlashing();
+            
             const flashingPositions = selectFlashingCells();
             const allCells = document.querySelectorAll('.cell');
             
@@ -203,80 +231,94 @@
                 if (cell && !cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
                     const randomDelay = Math.random() * 5000;
                     
-                    setTimeout(() => {
-                        setInterval(() => {
-                            // 15% chance to flash
-                            if (Math.random() < 0.15) {
-                                const randomColor = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
-                                const originalColor = cell.dataset.originalColor;
-                                
-                                cell.style.color = randomColor;
-                                cell.style.textShadow = `0 0 5px ${randomColor}`;
-                                
-                                setTimeout(() => {
-                                    // Only reset if color hasn't been changed by other interactions
-                                    if (cell.style.color === randomColor) {
-                                        cell.style.color = originalColor;
-                                        cell.style.textShadow = 'none';
-                                    }
-                                }, 200 + Math.random() * 300);
-                            }
-                        }, 800 + Math.random() * 1200); // Longer intervals between flashes
+                    const delayTimeout = setTimeout(() => {
+                        if (!isClickEffectActive) {
+                            const flashInterval = setInterval(() => {
+                                if (!isClickEffectActive && Math.random() < 0.15) {
+                                    const randomColor = flashingColors[Math.floor(Math.random() * flashingColors.length)];
+                                    const originalColor = cell.dataset.originalColor;
+                                    
+                                    cell.style.color = randomColor;
+                                    cell.style.textShadow = `0 0 5px ${randomColor}`;
+                                    
+                                    setTimeout(() => {
+                                        if (!isClickEffectActive && cell.style.color === randomColor) {
+                                            cell.style.color = originalColor;
+                                            cell.style.textShadow = 'none';
+                                        }
+                                    }, 200 + Math.random() * 300);
+                                }
+                            }, 800 + Math.random() * 1200);
+                            
+                            flashingIntervals.push(flashInterval);
+                        }
                     }, randomDelay);
+                    
+                    flashingIntervals.push(delayTimeout);
                 }
             });
         }
         
-        // Initialize features
-        createGrid();
-        setTimeout(() => {
-            addFlashingEffect();
-            addClickInteraction();
-        }, 500);
-        
-        // Add simple click interaction for center HRI/DAY block only
+        // Modified click interaction with flashing pause/restart
         function addClickInteraction() {
             const allCells = document.querySelectorAll('.cell');
             
-            // Only add click event to HRI/DAY center block (not Coming Soon)
             allCells.forEach(cell => {
                 const index = parseInt(cell.dataset.index);
                 const row = Math.floor(index / gridWidth);
                 const col = index % gridWidth;
                 const centerStartCol = centerCol - 1;
                 
-                // Check if this is part of the center HRI/DAY block only
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || // HRI row
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {     // DAY row
+                // Only add click event to HRI/DAY center block
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
                     
                     cell.addEventListener('click', () => {
-                        // Make all letters white instantly (except Coming Soon)
+                        // Stop all flashing immediately
+                        isClickEffectActive = true;
+                        clearAllFlashing();
+                        
+                        // Reset all cells to original state first
+                        resetAllCellsToOriginal();
+                        
+                        // Apply click color IMMEDIATELY (no setTimeout delay)
+                        const randomColor = clickColors[Math.floor(Math.random() * clickColors.length)];
+                        
+                        // Apply the random color to all gray letters instantly
                         allCells.forEach(targetCell => {
-                            const targetIndex = parseInt(targetCell.dataset.index);
-                            const targetRow = Math.floor(targetIndex / gridWidth);
-                            const bottomRow = gridHeight - 5;
-                            
-                            // Don't affect Coming Soon text or center HRI/DAY block
-                            if (targetCell.classList.contains('center-block') || targetCell.classList.contains('coming-soon')) {
-                                return;
+                            if (!targetCell.classList.contains('center-block') && 
+                                !targetCell.classList.contains('coming-soon')) {
+                                targetCell.style.color = randomColor;
+                                targetCell.style.textShadow = `0 0 5px ${randomColor}`;
                             }
-                                targetCell.style.color = '#FFFFFF';
-                                targetCell.style.textShadow = '0 0 5px #FFFFFF';
                         });
                         
-                        // Return to original colors after 1 second
+                        // After the click effect duration, reset and restart flashing
                         setTimeout(() => {
-                            allCells.forEach(targetCell => {
-                                if (!targetCell.classList.contains('center-block') && !targetCell.classList.contains('coming-soon')) {
-                                    targetCell.style.color = targetCell.dataset.originalColor;
-                                    targetCell.style.textShadow = 'none';
-                                }
-                            });
-                        }, 1000);
+                            // Reset to original gray state
+                            resetAllCellsToOriginal();
+                            
+                            // Mark click effect as finished
+                            isClickEffectActive = false;
+                            
+                            // Restart flashing after a short delay
+                            setTimeout(() => {
+                                addFlashingEffect();
+                            }, 100);
+                            
+                        }, 1000); // Your 2 second duration
                     });
                 }
             });
         }
+
+        
+        // Initialize
+        createGrid();
+        setTimeout(() => {
+            addFlashingEffect();
+            addClickInteraction();
+        }, 500);
     </script>
 </body>
-</html>M
+</html>

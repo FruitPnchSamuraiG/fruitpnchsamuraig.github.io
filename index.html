@@ -17,9 +17,7 @@
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(120, 1fr);
-            grid-template-rows: repeat(50, 1fr);
-            gap: 2px;
+            gap: 1px;
             background: #000;
             width: 100vw;
             height: 100vh;
@@ -30,12 +28,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 12px;
             font-weight: bold;
             color: #606060;
             background: #000;
             cursor: pointer;
             transition: color 0.1s ease;
+            font-size: clamp(6px, 2vw, 12px);
         }
         
         .center-block {
@@ -63,12 +61,46 @@
     <div class="grid-container" id="grid"></div>
 
     <script>
-        const grid = document.getElementById('grid');
-        const gridWidth = 120;
-        const gridHeight = 50;
+        // Calculate responsive grid dimensions
+        function calculateGridDimensions() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            let gridWidth, gridHeight;
+            
+            if (screenWidth <= 480) {
+                // Mobile phones
+                gridWidth = Math.max(30, Math.floor(screenWidth / 12));
+                gridHeight = Math.max(25, Math.floor(screenHeight / 16));
+            } else if (screenWidth <= 768) {
+                // Tablets
+                gridWidth = Math.floor(screenWidth / 10);
+                gridHeight = Math.floor(screenHeight / 15);
+            } else {
+                // Desktop
+                gridWidth = 120;
+                gridHeight = 50;
+            }
+            
+            // Ensure minimum dimensions for HRIDAY display
+            gridWidth = Math.max(gridWidth, 10);
+            gridHeight = Math.max(gridHeight, 10);
+            
+            return { gridWidth, gridHeight };
+        }
+        
+        // Initialize responsive dimensions
+        const dimensions = calculateGridDimensions();
+        const gridWidth = dimensions.gridWidth;
+        const gridHeight = dimensions.gridHeight;
         const totalCells = gridWidth * gridHeight;
         const centerRow = Math.floor(gridHeight / 2);
         const centerCol = Math.floor(gridWidth / 2);
+        
+        // Set responsive grid
+        const grid = document.getElementById('grid');
+        grid.style.gridTemplateColumns = `repeat(${gridWidth}, 1fr)`;
+        grid.style.gridTemplateRows = `repeat(${gridHeight}, 1fr)`;
         
         // Control variables for flashing state
         let flashingIntervals = [];
@@ -133,11 +165,13 @@
                 excludedPositions.push(centerRowBottom * gridWidth + col);
             }
             
-            const bottomRow = gridHeight - 5;
+            const bottomRow = gridHeight - 3; // Adjusted for smaller screens
             const comingSoonText = "COMING SOON";
             const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
             for (let col = textStartCol; col < textStartCol + comingSoonText.length; col++) {
-                excludedPositions.push(bottomRow * gridWidth + col);
+                if (col >= 0 && col < gridWidth) {
+                    excludedPositions.push(bottomRow * gridWidth + col);
+                }
             }
             
             const availableCells = totalCells - excludedPositions.length;
@@ -185,11 +219,11 @@
                     }
                 }
                 
-                const bottomRow = gridHeight - 5;
+                const bottomRow = gridHeight - 3;
                 const comingSoonText = "COMING SOON";
                 const textStartCol = Math.floor((gridWidth - comingSoonText.length) / 2);
                 
-                if (row === bottomRow && col >= textStartCol && col < textStartCol + comingSoonText.length) {
+                if (row === bottomRow && col >= textStartCol && col < textStartCol + comingSoonText.length && col >= 0 && col < gridWidth) {
                     cell.classList.add('coming-soon');
                     cell.dataset.originalColor = '#FFFFFF';
                     cell.textContent = comingSoonText[col - textStartCol];
@@ -306,12 +340,11 @@
                                 addFlashingEffect();
                             }, 100);
                             
-                        }, 1000); // Your 2 second duration
+                        }, 1000);
                     });
                 }
             });
         }
-
         
         // Initialize
         createGrid();
@@ -319,6 +352,13 @@
             addFlashingEffect();
             addClickInteraction();
         }, 500);
+        
+        // Handle screen rotation/resize
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                location.reload();
+            }, 100);
+        });
     </script>
 </body>
 </html>

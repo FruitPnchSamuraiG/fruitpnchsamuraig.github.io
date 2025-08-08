@@ -12,34 +12,28 @@
             font-family: 'Courier New', monospace;
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport height for mobile */
             overflow: hidden;
-            position: fixed; /* Prevent scrolling issues */
         }
         
         .grid-container {
             display: grid;
-            gap: 1px;
+            gap: 2px;
             background: #000;
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport height */
             position: relative;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            box-sizing: border-box;
         }
         
         .cell {
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 12px;
             font-weight: bold;
             color: #606060;
             background: #000;
             cursor: pointer;
             transition: color 0.1s ease;
-            font-size: clamp(4px, 1.8vw, 12px);
-            min-height: 0;
         }
         
         .center-block {
@@ -61,42 +55,52 @@
         .highlighted {
             text-shadow: 0 0 5px currentColor;
         }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .cell {
+                font-size: 8px;
+            }
+            .grid-container {
+                gap: 1px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cell {
+                font-size: 6px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="grid-container" id="grid"></div>
 
     <script>
-        // Calculate responsive grid dimensions with better mobile handling
+        // Calculate responsive grid dimensions - simpler approach
         function calculateGridDimensions() {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
-            const availableHeight = window.visualViewport ? window.visualViewport.height : screenHeight;
             
             let gridWidth, gridHeight;
             
             if (screenWidth <= 480) {
-                // Mobile phones - more conservative sizing
-                gridWidth = Math.max(20, Math.floor(screenWidth / 15));
-                gridHeight = Math.max(20, Math.floor(availableHeight / 20));
+                // Mobile phones
+                gridWidth = Math.floor(screenWidth / 8);
+                gridHeight = Math.floor(screenHeight / 12);
             } else if (screenWidth <= 768) {
                 // Tablets
-                gridWidth = Math.floor(screenWidth / 12);
-                gridHeight = Math.floor(availableHeight / 18);
+                gridWidth = Math.floor(screenWidth / 10);
+                gridHeight = Math.floor(screenHeight / 15);
             } else {
                 // Desktop
                 gridWidth = 120;
                 gridHeight = 50;
             }
             
-            // Ensure minimum dimensions and account for safe areas on mobile
-            gridWidth = Math.max(gridWidth, 15);
+            // Ensure minimum dimensions
+            gridWidth = Math.max(gridWidth, 20);
             gridHeight = Math.max(gridHeight, 15);
-            
-            // For very small screens, reduce further to ensure "Coming Soon" is visible
-            if (screenHeight < 600) {
-                gridHeight = Math.max(12, Math.floor(gridHeight * 0.8));
-            }
             
             return { gridWidth, gridHeight };
         }
@@ -166,8 +170,8 @@
                 }
             }
             
-            // Better "Coming Soon" positioning - ensure it's visible
-            const bottomRow = Math.max(0, gridHeight - 2); // Only 2 rows from bottom
+            // Coming Soon positioning
+            const bottomRow = Math.max(0, gridHeight - 3);
             const comingSoonText = "COMING SOON";
             const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
             
@@ -221,8 +225,8 @@
                     }
                 }
                 
-                // Coming Soon text - positioned more safely
-                const bottomRow = Math.max(0, gridHeight - 2);
+                // Coming Soon text
+                const bottomRow = Math.max(0, gridHeight - 3);
                 const comingSoonText = "COMING SOON";
                 const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
                 
@@ -343,25 +347,6 @@
             addFlashingEffect();
             addClickInteraction();
         }, 500);
-        
-        // Better resize handling
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                location.reload();
-            }, 300);
-        });
-        
-        // Handle viewport changes on mobile
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    location.reload();
-                }, 300);
-            });
-        }
     </script>
 </body>
 </html>

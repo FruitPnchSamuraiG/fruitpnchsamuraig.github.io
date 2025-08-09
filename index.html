@@ -213,8 +213,8 @@
             // Coming Soon positioning - responsive with mobile adjustment
             let bottomOffset;
             if (window.innerWidth <= 480) {
-                // Mobile: move much higher to avoid browser UI
-                bottomOffset = Math.max(8, Math.floor(gridHeight * 0.25));
+                // Mobile: move much higher to avoid browser UI, but not too high
+                bottomOffset = Math.max(4, Math.floor(gridHeight * 0.15));
             } else if (window.innerWidth <= 768) {
                 // Tablet: moderate offset
                 bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));
@@ -281,8 +281,8 @@
                 // Coming Soon text - responsive positioning with mobile adjustment
                 let bottomOffset;
                 if (window.innerWidth <= 480) {
-                    // Mobile: move much higher to avoid browser UI
-                    bottomOffset = Math.max(8, Math.floor(gridHeight * 0.25));
+                    // Mobile: move much higher to avoid browser UI, but not too high
+                    bottomOffset = Math.max(4, Math.floor(gridHeight * 0.15));
                 } else if (window.innerWidth <= 768) {
                     // Tablet: moderate offset
                     bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));

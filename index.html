@@ -35,6 +35,7 @@
             transition: color 0.1s ease;
             min-width: 0;
             min-height: 0;
+            will-change: color, text-shadow, transform;
         }
         
         .center-block {
@@ -55,6 +56,16 @@
         
         .highlighted {
             text-shadow: 0 0 5px currentColor;
+        }
+
+        /* Optimized animation classes for better performance */
+        .ripple-wave {
+            transform: scale(1.2) !important;
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+
+        .ripple-fade {
+            transition: color 0.3s ease-out, text-shadow 0.3s ease-out !important;
         }
 
         /* Proportional font scaling that maintains readability */
@@ -171,9 +182,9 @@
             '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
         ];
         
-        const clickColors = [
+        const rippleColors = [
             '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
-            '#9400D3', '#FF0000', '#FFD700', '#00FFFF', '#606060'
+            '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
         ];
         
         // Generate grid with alternating HRI/DAY rows
@@ -193,6 +204,78 @@
             }
             
             return letters;
+        }
+        
+        // Calculate distance between two grid positions
+        function calculateDistance(row1, col1, row2, col2) {
+            return Math.sqrt(Math.pow(row2 - row1, 2) + Math.pow(col2 - col1, 2));
+        }
+        
+        // Create ripple effect from center
+        function createRippleEffect() {
+            const allCells = document.querySelectorAll('.cell');
+            const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
+            
+            // Center position for ripple origin
+            const centerStartCol = Math.max(0, centerCol - 1);
+            const rippleCenterRow = centerRow - 0.5; // Between the two center rows
+            const rippleCenterCol = centerStartCol + 1; // Middle of HRIDAY block
+            
+            // Group cells by distance from center
+            const cellsByDistance = {};
+            
+            allCells.forEach((cell, index) => {
+                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                    const row = Math.floor(index / gridWidth);
+                    const col = index % gridWidth;
+                    const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
+                    const roundedDistance = Math.floor(distance);
+                    
+                    if (!cellsByDistance[roundedDistance]) {
+                        cellsByDistance[roundedDistance] = [];
+                    }
+                    cellsByDistance[roundedDistance].push(cell);
+                }
+            });
+            
+            // Find maximum distance for timing calculations
+            const maxDistance = Math.max(...Object.keys(cellsByDistance).map(d => parseInt(d)));
+            
+            // Animate each distance ring with delays
+            Object.keys(cellsByDistance).sort((a, b) => parseInt(a) - parseInt(b)).forEach(distance => {
+                const cells = cellsByDistance[distance];
+                const delay = parseInt(distance) * 50; // 50ms delay per distance unit
+                
+                setTimeout(() => {
+                    cells.forEach(cell => {
+                        // Apply color and pop effect
+                        cell.style.color = rippleColor;
+                        cell.style.textShadow = `0 0 8px ${rippleColor}`;
+                        cell.classList.add('ripple-wave');
+                        
+                        // Remove pop effect after brief moment
+                        setTimeout(() => {
+                            cell.classList.remove('ripple-wave');
+                            cell.classList.add('ripple-fade');
+                        }, 150);
+                        
+                        // Fade back to original color
+                        setTimeout(() => {
+                            cell.style.color = cell.dataset.originalColor;
+                            cell.style.textShadow = 'none';
+                            cell.classList.remove('ripple-fade');
+                        }, 300);
+                    });
+                }, delay);
+            });
+            
+            // Reset effect state after animation completes
+            setTimeout(() => {
+                isClickEffectActive = false;
+                setTimeout(() => {
+                    addFlashingEffect();
+                }, 100);
+            }, maxDistance * 50 + 500);
         }
         
         // Select cells for flashing (adjusted percentage for mobile)
@@ -320,6 +403,8 @@
                 if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
                     cell.style.color = cell.dataset.originalColor;
                     cell.style.textShadow = 'none';
+                    cell.style.transform = '';
+                    cell.classList.remove('ripple-wave', 'ripple-fade');
                 }
             });
         }
@@ -367,7 +452,7 @@
             });
         }
         
-        // Click interaction with touch support
+        // Click interaction with touch support and NEW ripple effect
         function addClickInteraction() {
             const allCells = document.querySelectorAll('.cell');
             
@@ -392,30 +477,91 @@
                         clearAllFlashing();
                         resetAllCellsToOriginal();
                         
-                        const randomColor = clickColors[Math.floor(Math.random() * clickColors.length)];
-                        
-                        allCells.forEach(targetCell => {
-                            if (!targetCell.classList.contains('center-block') && 
-                                !targetCell.classList.contains('coming-soon')) {
-                                targetCell.style.color = randomColor;
-                                targetCell.style.textShadow = `0 0 5px ${randomColor}`;
-                            }
-                        });
-                        
-                        setTimeout(() => {
-                            resetAllCellsToOriginal();
-                            isClickEffectActive = false;
-                            
-                            setTimeout(() => {
-                                addFlashingEffect();
-                            }, 100);
-                        }, 1000);
+                        // Start ripple effect
+                        createRippleEffect();
                     };
                     
                     cell.addEventListener('click', handleInteraction);
                     cell.addEventListener('touchstart', handleInteraction);
                 }
             });
+        }
+        
+        // NEW: Create cumulative ripple effect from center
+        function createRippleEffect() {
+            const allCells = document.querySelectorAll('.cell');
+            const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
+            
+            // Center position for ripple origin
+            const centerStartCol = Math.max(0, centerCol - 1);
+            const rippleCenterRow = centerRow - 0.5; // Between the two center rows
+            const rippleCenterCol = centerStartCol + 1; // Middle of HRIDAY block
+            
+            // Group cells by distance from center
+            const cellsByDistance = {};
+            let maxDistance = 0;
+            
+            allCells.forEach((cell, index) => {
+                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                    const row = Math.floor(index / gridWidth);
+                    const col = index % gridWidth;
+                    const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
+                    const roundedDistance = Math.floor(distance * 2) / 2; // Use half-integer steps for smoother effect
+                    
+                    maxDistance = Math.max(maxDistance, roundedDistance);
+                    
+                    if (!cellsByDistance[roundedDistance]) {
+                        cellsByDistance[roundedDistance] = [];
+                    }
+                    cellsByDistance[roundedDistance].push({ cell, row, col });
+                }
+            });
+            
+            // Create cumulative wave effect - each distance ring animates in sequence but stays colored
+            Object.keys(cellsByDistance).sort((a, b) => parseFloat(a) - parseFloat(b)).forEach(distance => {
+                const cellsAtDistance = cellsByDistance[distance];
+                const delay = parseFloat(distance) * 40; // 40ms delay per distance unit for smooth wave
+                
+                setTimeout(() => {
+                    cellsAtDistance.forEach(({ cell }) => {
+                        // Apply ripple color and pop effect
+                        cell.style.color = rippleColor;
+                        cell.style.textShadow = `0 0 10px ${rippleColor}`;
+                        cell.classList.add('ripple-wave');
+                        
+                        // Remove pop effect but KEEP the color
+                        setTimeout(() => {
+                            cell.classList.remove('ripple-wave');
+                            // Don't fade back to original - keep the ripple color!
+                        }, 200);
+                    });
+                }, delay);
+            });
+            
+            // Only fade everything back AFTER the ripple reaches the edges
+            const totalRippleTime = maxDistance * 40 + 300;
+            setTimeout(() => {
+                // Now fade all colored cells back to original
+                allCells.forEach(cell => {
+                    if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                        cell.classList.add('ripple-fade');
+                        cell.style.color = cell.dataset.originalColor;
+                        cell.style.textShadow = 'none';
+                        
+                        setTimeout(() => {
+                            cell.classList.remove('ripple-fade');
+                        }, 400);
+                    }
+                });
+                
+                // Reset effect state after fade completes
+                setTimeout(() => {
+                    isClickEffectActive = false;
+                    setTimeout(() => {
+                        addFlashingEffect();
+                    }, 100);
+                }, 500);
+            }, totalRippleTime);
         }
         
         // Handle orientation changes

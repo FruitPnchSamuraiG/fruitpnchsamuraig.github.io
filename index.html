@@ -210,8 +210,18 @@
                 }
             }
             
-            // Coming Soon positioning - responsive
-            const bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
+            // Coming Soon positioning - responsive with mobile adjustment
+            let bottomOffset;
+            if (window.innerWidth <= 480) {
+                // Mobile: move much higher to avoid browser UI
+                bottomOffset = Math.max(8, Math.floor(gridHeight * 0.25));
+            } else if (window.innerWidth <= 768) {
+                // Tablet: moderate offset
+                bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));
+            } else {
+                // Laptop/Desktop: original positioning
+                bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
+            }
             const bottomRow = Math.max(0, gridHeight - bottomOffset);
             const comingSoonText = "COMING SOON";
             const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
@@ -268,8 +278,18 @@
                     }
                 }
                 
-                // Coming Soon text - responsive positioning
-                const bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
+                // Coming Soon text - responsive positioning with mobile adjustment
+                let bottomOffset;
+                if (window.innerWidth <= 480) {
+                    // Mobile: move much higher to avoid browser UI
+                    bottomOffset = Math.max(8, Math.floor(gridHeight * 0.25));
+                } else if (window.innerWidth <= 768) {
+                    // Tablet: moderate offset
+                    bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));
+                } else {
+                    // Laptop/Desktop: original positioning
+                    bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
+                }
                 const bottomRow = Math.max(0, gridHeight - bottomOffset);
                 const comingSoonText = "COMING SOON";
                 const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
@@ -361,7 +381,13 @@
                     (row === centerRow && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1))) {
                     
                     // Add both click and touch events for mobile compatibility
-                    const handleInteraction = () => {
+                    const handleInteraction = (event) => {
+                        // Prevent double firing on mobile devices
+                        event.preventDefault();
+                        
+                        // Debounce to prevent rapid multiple triggers
+                        if (isClickEffectActive) return;
+                        
                         isClickEffectActive = true;
                         clearAllFlashing();
                         resetAllCellsToOriginal();
@@ -387,7 +413,7 @@
                     };
                     
                     cell.addEventListener('click', handleInteraction);
-                    cell.addEventListener('touchstart', handleInteraction, { passive: true });
+                    cell.addEventListener('touchstart', handleInteraction);
                 }
             });
         }

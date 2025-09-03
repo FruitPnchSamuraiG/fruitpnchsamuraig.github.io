@@ -44,12 +44,6 @@
             text-shadow: 0 0 10px #FFFFFF;
         }
         
-        .coming-soon {
-            color: #FFFFFF !important;
-            font-style: normal;
-            text-shadow: 0 0 10px #FFFFFF;
-        }
-        
         .cursor-highlight {
             transition: color 0.1s ease;
         }
@@ -211,106 +205,19 @@
             return Math.sqrt(Math.pow(row2 - row1, 2) + Math.pow(col2 - col1, 2));
         }
         
-        // Create ripple effect from center
-        function createRippleEffect() {
-            const allCells = document.querySelectorAll('.cell');
-            const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
-            
-            // Center position for ripple origin
-            const centerStartCol = Math.max(0, centerCol - 1);
-            const rippleCenterRow = centerRow - 0.5; // Between the two center rows
-            const rippleCenterCol = centerStartCol + 1; // Middle of HRIDAY block
-            
-            // Group cells by distance from center
-            const cellsByDistance = {};
-            
-            allCells.forEach((cell, index) => {
-                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
-                    const row = Math.floor(index / gridWidth);
-                    const col = index % gridWidth;
-                    const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
-                    const roundedDistance = Math.floor(distance);
-                    
-                    if (!cellsByDistance[roundedDistance]) {
-                        cellsByDistance[roundedDistance] = [];
-                    }
-                    cellsByDistance[roundedDistance].push(cell);
-                }
-            });
-            
-            // Find maximum distance for timing calculations
-            const maxDistance = Math.max(...Object.keys(cellsByDistance).map(d => parseInt(d)));
-            
-            // Animate each distance ring with delays
-            Object.keys(cellsByDistance).sort((a, b) => parseInt(a) - parseInt(b)).forEach(distance => {
-                const cells = cellsByDistance[distance];
-                const delay = parseInt(distance) * 50; // 50ms delay per distance unit
-                
-                setTimeout(() => {
-                    cells.forEach(cell => {
-                        // Apply color and pop effect
-                        cell.style.color = rippleColor;
-                        cell.style.textShadow = `0 0 8px ${rippleColor}`;
-                        cell.classList.add('ripple-wave');
-                        
-                        // Remove pop effect after brief moment
-                        setTimeout(() => {
-                            cell.classList.remove('ripple-wave');
-                            cell.classList.add('ripple-fade');
-                        }, 150);
-                        
-                        // Fade back to original color
-                        setTimeout(() => {
-                            cell.style.color = cell.dataset.originalColor;
-                            cell.style.textShadow = 'none';
-                            cell.classList.remove('ripple-fade');
-                        }, 300);
-                    });
-                }, delay);
-            });
-            
-            // Reset effect state after animation completes
-            setTimeout(() => {
-                isClickEffectActive = false;
-                setTimeout(() => {
-                    addFlashingEffect();
-                }, 100);
-            }, maxDistance * 50 + 500);
-        }
-        
-        // Select cells for flashing (adjusted percentage for mobile)
+        // Select cells for flashing (no exclusion for "COMING SOON" anymore)
         function selectFlashingCells() {
             const excludedPositions = [];
             const centerStartCol = Math.floor(gridWidth / 2) - 1;
             const centerRowTop = Math.floor(gridHeight / 2) - 1;
             const centerRowBottom = Math.floor(gridHeight / 2);
             
-            // Exclude center HRIDAY block
+            // Only exclude center HRIDAY block
             for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
                 if (col >= 0 && col < gridWidth) {
                     excludedPositions.push(centerRowTop * gridWidth + col);
                     excludedPositions.push(centerRowBottom * gridWidth + col);
                 }
-            }
-            
-            // Coming Soon positioning - responsive with mobile adjustment
-            let bottomOffset;
-            if (window.innerWidth <= 480) {
-                // Mobile: move much higher to avoid browser UI, but not too high
-                bottomOffset = Math.max(4, Math.floor(gridHeight * 0.15));
-            } else if (window.innerWidth <= 768) {
-                // Tablet: moderate offset
-                bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));
-            } else {
-                // Laptop/Desktop: original positioning
-                bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
-            }
-            const bottomRow = Math.max(0, gridHeight - bottomOffset);
-            const comingSoonText = "COMING SOON";
-            const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
-            
-            for (let col = textStartCol; col < Math.min(textStartCol + comingSoonText.length, gridWidth); col++) {
-                excludedPositions.push(bottomRow * gridWidth + col);
             }
             
             const availableCells = totalCells - excludedPositions.length;
@@ -361,28 +268,6 @@
                     }
                 }
                 
-                // Coming Soon text - responsive positioning with mobile adjustment
-                let bottomOffset;
-                if (window.innerWidth <= 480) {
-                    // Mobile: move much higher to avoid browser UI, but not too high
-                    bottomOffset = Math.max(4, Math.floor(gridHeight * 0.15));
-                } else if (window.innerWidth <= 768) {
-                    // Tablet: moderate offset
-                    bottomOffset = Math.max(6, Math.floor(gridHeight * 0.15));
-                } else {
-                    // Laptop/Desktop: original positioning
-                    bottomOffset = Math.min(5, Math.floor(gridHeight * 0.1));
-                }
-                const bottomRow = Math.max(0, gridHeight - bottomOffset);
-                const comingSoonText = "COMING SOON";
-                const textStartCol = Math.max(0, Math.floor((gridWidth - comingSoonText.length) / 2));
-                
-                if (row === bottomRow && col >= textStartCol && col < Math.min(textStartCol + comingSoonText.length, gridWidth)) {
-                    cell.classList.add('coming-soon');
-                    cell.dataset.originalColor = '#FFFFFF';
-                    cell.textContent = comingSoonText[col - textStartCol];
-                }
-                
                 grid.appendChild(cell);
             }
         }
@@ -400,7 +285,7 @@
         function resetAllCellsToOriginal() {
             const allCells = document.querySelectorAll('.cell');
             allCells.forEach(cell => {
-                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                if (!cell.classList.contains('center-block')) {
                     cell.style.color = cell.dataset.originalColor;
                     cell.style.textShadow = 'none';
                     cell.style.transform = '';
@@ -421,7 +306,7 @@
             
             flashingPositions.forEach(position => {
                 const cell = allCells[position];
-                if (cell && !cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                if (cell && !cell.classList.contains('center-block')) {
                     const randomDelay = Math.random() * 5000 * animationMultiplier;
                     
                     const delayTimeout = setTimeout(() => {
@@ -452,7 +337,7 @@
             });
         }
         
-        // Click interaction with touch support and NEW ripple effect
+        // Click interaction with touch support and ripple effect
         function addClickInteraction() {
             const allCells = document.querySelectorAll('.cell');
             
@@ -487,7 +372,7 @@
             });
         }
         
-        // NEW: Create cumulative ripple effect from center
+        // Create cumulative ripple effect from center
         function createRippleEffect() {
             const allCells = document.querySelectorAll('.cell');
             const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
@@ -502,7 +387,7 @@
             let maxDistance = 0;
             
             allCells.forEach((cell, index) => {
-                if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                if (!cell.classList.contains('center-block')) {
                     const row = Math.floor(index / gridWidth);
                     const col = index % gridWidth;
                     const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
@@ -543,7 +428,7 @@
             setTimeout(() => {
                 // Now fade all colored cells back to original
                 allCells.forEach(cell => {
-                    if (!cell.classList.contains('center-block') && !cell.classList.contains('coming-soon')) {
+                    if (!cell.classList.contains('center-block')) {
                         cell.classList.add('ripple-fade');
                         cell.style.color = cell.dataset.originalColor;
                         cell.style.textShadow = 'none';

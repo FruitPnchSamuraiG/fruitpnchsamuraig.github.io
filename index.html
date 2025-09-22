@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing Page</title>
+    <title>HRIDAY Grid</title>
     <style>
         body {
             margin: 0;
@@ -17,11 +17,12 @@
         
         .grid-container {
             display: grid;
-            gap: 2px;
-            background: #000;
+            grid-template-columns: repeat(60, 1fr);
+            grid-template-rows: repeat(30, 1fr);
+            gap: 1px;
             width: 100vw;
             height: 100vh;
-            position: relative;
+            background: #000;
         }
         
         .cell {
@@ -33,8 +34,7 @@
             background: #000;
             cursor: pointer;
             transition: color 0.1s ease;
-            min-width: 0;
-            min-height: 0;
+            font-size: min(2vw, 2vh);
             will-change: color, text-shadow, transform;
         }
         
@@ -44,15 +44,6 @@
             text-shadow: 0 0 10px #FFFFFF;
         }
         
-        .cursor-highlight {
-            transition: color 0.1s ease;
-        }
-        
-        .highlighted {
-            text-shadow: 0 0 5px currentColor;
-        }
-
-        /* Optimized animation classes for better performance */
         .ripple-wave {
             transform: scale(1.2) !important;
             transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
@@ -61,116 +52,21 @@
         .ripple-fade {
             transition: color 0.3s ease-out, text-shadow 0.3s ease-out !important;
         }
-
-        /* Proportional font scaling that maintains readability */
-        @media (max-width: 480px) {
-            .cell {
-                font-size: clamp(8px, 2.5vw, 12px);
-            }
-            .grid-container {
-                gap: 1px;
-            }
-        }
-
-        @media (min-width: 481px) and (max-width: 768px) {
-            .cell {
-                font-size: clamp(10px, 1.8vw, 14px);
-            }
-            .grid-container {
-                gap: 1px;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1200px) {
-            .cell {
-                font-size: clamp(11px, 1.2vw, 14px);
-            }
-            .grid-container {
-                gap: 2px;
-            }
-        }
-
-        @media (min-width: 1201px) and (max-width: 1600px) {
-            .cell {
-                font-size: clamp(12px, 1vw, 16px);
-            }
-            .grid-container {
-                gap: 2px;
-            }
-        }
-
-        @media (min-width: 1601px) {
-            .cell {
-                font-size: 12px;
-            }
-            .grid-container {
-                gap: 2px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="grid-container" id="grid"></div>
 
     <script>
-        // Consistent proportional grid with better scaling
-        function calculateGridDimensions() {
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            
-            let gridWidth, gridHeight;
-            
-            if (screenWidth <= 480) {
-                // Mobile phones - proportionally smaller but readable
-                gridWidth = Math.floor(screenWidth / 12);
-                gridHeight = Math.floor(screenHeight / 16);
-            } else if (screenWidth <= 768) {
-                // Tablets - maintain proportion
-                gridWidth = Math.floor(screenWidth / 14);
-                gridHeight = Math.floor(screenHeight / 18);
-            } else if (screenWidth <= 1200) {
-                // Standard laptops - keep original feel
-                gridWidth = Math.floor(screenWidth / 16);
-                gridHeight = Math.floor(screenHeight / 20);
-            } else if (screenWidth <= 1600) {
-                // Large laptops/small desktops
-                gridWidth = Math.floor(screenWidth / 18);
-                gridHeight = Math.floor(screenHeight / 22);
-            } else {
-                // Large desktops - original dense look
-                gridWidth = 120;
-                gridHeight = 50;
-            }
-            
-            // Ensure reasonable bounds
-            gridWidth = Math.max(Math.min(gridWidth, 120), 20);
-            gridHeight = Math.max(Math.min(gridHeight, 50), 25);
-            
-            return { gridWidth, gridHeight };
-        }
-        
-        // Initialize responsive dimensions
-        const dimensions = calculateGridDimensions();
-        const gridWidth = dimensions.gridWidth;
-        const gridHeight = dimensions.gridHeight;
+        const gridWidth = 60;
+        const gridHeight = 30;
         const totalCells = gridWidth * gridHeight;
         const centerRow = Math.floor(gridHeight / 2);
         const centerCol = Math.floor(gridWidth / 2);
         
-        // Set responsive grid
-        const grid = document.getElementById('grid');
-        grid.style.gridTemplateColumns = `repeat(${gridWidth}, 1fr)`;
-        grid.style.gridTemplateRows = `repeat(${gridHeight}, 1fr)`;
-        
-        // Control variables for flashing state
         let flashingIntervals = [];
         let isClickEffectActive = false;
         
-        // Letters to include
-        const hridayLetters = ['H', 'R', 'I', 'D', 'A', 'Y'];
-        const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        
-        // Separate color arrays for different effects
         const flashingColors = [
             '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
             '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
@@ -181,10 +77,8 @@
             '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
         ];
         
-        // Generate grid with alternating HRI/DAY rows
         function generateGrid() {
             const letters = [];
-            
             for (let row = 0; row < gridHeight; row++) {
                 for (let col = 0; col < gridWidth; col++) {
                     if (row % 2 === 0) {
@@ -196,37 +90,28 @@
                     }
                 }
             }
-            
             return letters;
         }
         
-        // Calculate distance between two grid positions
         function calculateDistance(row1, col1, row2, col2) {
             return Math.sqrt(Math.pow(row2 - row1, 2) + Math.pow(col2 - col1, 2));
         }
         
-        // Select cells for flashing (no exclusion for "COMING SOON" anymore)
         function selectFlashingCells() {
             const excludedPositions = [];
-            const centerStartCol = Math.floor(gridWidth / 2) - 1;
-            const centerRowTop = Math.floor(gridHeight / 2) - 1;
-            const centerRowBottom = Math.floor(gridHeight / 2);
+            const centerStartCol = centerCol - 1;
             
-            // Only exclude center HRIDAY block
+            // Exclude center HRIDAY block
             for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
-                if (col >= 0 && col < gridWidth) {
-                    excludedPositions.push(centerRowTop * gridWidth + col);
-                    excludedPositions.push(centerRowBottom * gridWidth + col);
-                }
+                excludedPositions.push((centerRow - 1) * gridWidth + col);
+                excludedPositions.push(centerRow * gridWidth + col);
             }
             
             const availableCells = totalCells - excludedPositions.length;
-            // Reduce flashing percentage on mobile for better performance
-            const flashingPercentage = gridWidth < 30 ? 0.2 : 0.3;
-            const numFlashing = Math.floor(availableCells * flashingPercentage);
+            const numFlashing = Math.floor(availableCells * 0.25);
             const positions = [];
             
-            while (positions.length < numFlashing && positions.length < availableCells) {
+            while (positions.length < numFlashing) {
                 const pos = Math.floor(Math.random() * totalCells);
                 if (!positions.includes(pos) && !excludedPositions.includes(pos)) {
                     positions.push(pos);
@@ -236,9 +121,9 @@
             return positions;
         }
         
-        // Create the grid
         function createGrid() {
             const letters = generateGrid();
+            const grid = document.getElementById('grid');
             
             for (let i = 0; i < totalCells; i++) {
                 const cell = document.createElement('div');
@@ -249,11 +134,11 @@
                 
                 const row = Math.floor(i / gridWidth);
                 const col = i % gridWidth;
-                const centerStartCol = Math.max(0, centerCol - 1);
+                const centerStartCol = centerCol - 1;
                 
-                // Center HRIDAY block - ensure it fits on all screen sizes
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1)) || 
-                    (row === centerRow && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1))) {
+                // Center HRIDAY block
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
                     cell.classList.add('center-block');
                     cell.dataset.originalColor = '#FFFFFF';
                     
@@ -272,7 +157,6 @@
             }
         }
         
-        // Function to clear all flashing intervals
         function clearAllFlashing() {
             flashingIntervals.forEach(interval => {
                 clearInterval(interval);
@@ -281,7 +165,6 @@
             flashingIntervals = [];
         }
         
-        // Function to reset all cells to original gray state
         function resetAllCellsToOriginal() {
             const allCells = document.querySelectorAll('.cell');
             allCells.forEach(cell => {
@@ -294,25 +177,21 @@
             });
         }
         
-        // Modified flashing effect with performance optimization for mobile
         function addFlashingEffect() {
             clearAllFlashing();
             
             const flashingPositions = selectFlashingCells();
             const allCells = document.querySelectorAll('.cell');
             
-            // Reduce animation frequency on smaller screens for better performance
-            const animationMultiplier = gridWidth < 30 ? 1.5 : 1;
-            
             flashingPositions.forEach(position => {
                 const cell = allCells[position];
                 if (cell && !cell.classList.contains('center-block')) {
-                    const randomDelay = Math.random() * 5000 * animationMultiplier;
+                    const randomDelay = Math.random() * 3000;
                     
                     const delayTimeout = setTimeout(() => {
                         if (!isClickEffectActive) {
                             const flashInterval = setInterval(() => {
-                                if (!isClickEffectActive && Math.random() < 0.15) {
+                                if (!isClickEffectActive && Math.random() < 0.2) {
                                     const randomColor = flashingColors[Math.floor(Math.random() * flashingColors.length)];
                                     const originalColor = cell.dataset.originalColor;
                                     
@@ -324,9 +203,9 @@
                                             cell.style.color = originalColor;
                                             cell.style.textShadow = 'none';
                                         }
-                                    }, 200 + Math.random() * 300);
+                                    }, 300);
                                 }
-                            }, (800 + Math.random() * 1200) * animationMultiplier);
+                            }, 1000);
                             
                             flashingIntervals.push(flashInterval);
                         }
@@ -337,7 +216,6 @@
             });
         }
         
-        // Click interaction with touch support and ripple effect
         function addClickInteraction() {
             const allCells = document.querySelectorAll('.cell');
             
@@ -345,24 +223,18 @@
                 const index = parseInt(cell.dataset.index);
                 const row = Math.floor(index / gridWidth);
                 const col = index % gridWidth;
-                const centerStartCol = Math.max(0, centerCol - 1);
+                const centerStartCol = centerCol - 1;
                 
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1)) || 
-                    (row === centerRow && col >= centerStartCol && col <= Math.min(centerStartCol + 2, gridWidth - 1))) {
+                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
+                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
                     
-                    // Add both click and touch events for mobile compatibility
                     const handleInteraction = (event) => {
-                        // Prevent double firing on mobile devices
                         event.preventDefault();
-                        
-                        // Debounce to prevent rapid multiple triggers
                         if (isClickEffectActive) return;
                         
                         isClickEffectActive = true;
                         clearAllFlashing();
                         resetAllCellsToOriginal();
-                        
-                        // Start ripple effect
                         createRippleEffect();
                     };
                     
@@ -372,17 +244,14 @@
             });
         }
         
-        // Create cumulative ripple effect from center
         function createRippleEffect() {
             const allCells = document.querySelectorAll('.cell');
             const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
             
-            // Center position for ripple origin
-            const centerStartCol = Math.max(0, centerCol - 1);
-            const rippleCenterRow = centerRow - 0.5; // Between the two center rows
-            const rippleCenterCol = centerStartCol + 1; // Middle of HRIDAY block
+            const centerStartCol = centerCol - 1;
+            const rippleCenterRow = centerRow - 0.5;
+            const rippleCenterCol = centerStartCol + 1;
             
-            // Group cells by distance from center
             const cellsByDistance = {};
             let maxDistance = 0;
             
@@ -391,7 +260,7 @@
                     const row = Math.floor(index / gridWidth);
                     const col = index % gridWidth;
                     const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
-                    const roundedDistance = Math.floor(distance * 2) / 2; // Use half-integer steps for smoother effect
+                    const roundedDistance = Math.floor(distance * 2) / 2;
                     
                     maxDistance = Math.max(maxDistance, roundedDistance);
                     
@@ -402,31 +271,25 @@
                 }
             });
             
-            // Create cumulative wave effect - each distance ring animates in sequence but stays colored
             Object.keys(cellsByDistance).sort((a, b) => parseFloat(a) - parseFloat(b)).forEach(distance => {
                 const cellsAtDistance = cellsByDistance[distance];
-                const delay = parseFloat(distance) * 40; // 40ms delay per distance unit for smooth wave
+                const delay = parseFloat(distance) * 40;
                 
                 setTimeout(() => {
                     cellsAtDistance.forEach(({ cell }) => {
-                        // Apply ripple color and pop effect
                         cell.style.color = rippleColor;
                         cell.style.textShadow = `0 0 10px ${rippleColor}`;
                         cell.classList.add('ripple-wave');
                         
-                        // Remove pop effect but KEEP the color
                         setTimeout(() => {
                             cell.classList.remove('ripple-wave');
-                            // Don't fade back to original - keep the ripple color!
                         }, 200);
                     });
                 }, delay);
             });
             
-            // Only fade everything back AFTER the ripple reaches the edges
             const totalRippleTime = maxDistance * 40 + 300;
             setTimeout(() => {
-                // Now fade all colored cells back to original
                 allCells.forEach(cell => {
                     if (!cell.classList.contains('center-block')) {
                         cell.classList.add('ripple-fade');
@@ -439,7 +302,6 @@
                     }
                 });
                 
-                // Reset effect state after fade completes
                 setTimeout(() => {
                     isClickEffectActive = false;
                     setTimeout(() => {
@@ -448,16 +310,6 @@
                 }, 500);
             }, totalRippleTime);
         }
-        
-        // Handle orientation changes
-        function handleOrientationChange() {
-            setTimeout(() => {
-                location.reload();
-            }, 100);
-        }
-        
-        window.addEventListener('orientationchange', handleOrientationChange);
-        window.addEventListener('resize', handleOrientationChange);
         
         // Initialize
         createGrid();

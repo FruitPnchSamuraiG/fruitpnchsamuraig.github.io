@@ -376,8 +376,19 @@
         function addDoubleClickToCenterBlock() {
             const allCells = document.querySelectorAll('.cell.center-block');
             allCells.forEach(cell => {
+                // Double click for desktop
                 cell.addEventListener('dblclick', function() {
                     window.location.href = 'index.html';
+                });
+                // Touch event for mobile
+                let lastTap = 0;
+                cell.addEventListener('touchend', function(e) {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 400 && tapLength > 0) {
+                        window.location.href = 'index.html';
+                    }
+                    lastTap = currentTime;
                 });
             });
         }

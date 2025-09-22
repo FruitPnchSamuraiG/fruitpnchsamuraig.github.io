@@ -1,322 +1,222 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HRIDAY Grid</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            font-family: 'Courier New', monospace;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(60, 1fr);
-            grid-template-rows: repeat(30, 1fr);
-            gap: 1px;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-        }
-        
-        .cell {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            color: #606060;
-            background: #000;
-            cursor: pointer;
-            transition: color 0.1s ease;
-            font-size: min(2vw, 2vh);
-            will-change: color, text-shadow, transform;
-        }
-        
-        .center-block {
-            color: #FFFFFF !important;
-            font-style: italic;
-            text-shadow: 0 0 10px #FFFFFF;
-        }
-        
-        .ripple-wave {
-            transform: scale(1.2) !important;
-            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>hriday ranka</title>
+  <meta name="description" content="computer scientist??" />
+  <style>
+    :root{
+      --bg:#fff; --fg:#000; --muted:#444;
+      --maxw:1040px;
+      --name-size:clamp(40px,7.5vw,84px);
+    }
+    html,body{
+      margin:0;padding:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Helvetica,Arial,sans-serif;
+    }
+    a{color:inherit;text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 16px;}
 
-        .ripple-fade {
-            transition: color 0.3s ease-out, text-shadow 0.3s ease-out !important;
-        }
-    </style>
+    header{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:baseline;
+      column-gap:18px;
+      margin-bottom:34px;
+    }
+    .left{display:flex;flex-direction:column;align-items:flex-start;}
+    .name{
+      font-size:var(--name-size);
+      font-weight:650;
+      letter-spacing:-0.02em;
+      line-height:0.9;
+      white-space:nowrap;
+    }
+    .icons{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:8px;
+      color:rgba(0,0,0,0.45);
+    }
+    .icon{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;}
+    .icon svg{width:100%;height:100%;}
+    .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+    .tag{font-size:16px;color:var(--muted);white-space:nowrap;}
+
+    /* Main layout - FIXED */
+    main{
+      position: relative;
+      width: 100%;
+      min-height: 200px;
+    }
+
+    /* Left section */
+    .left-section{
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 220px;
+    }
+
+    /* Right section - FIXED - Actually on the RIGHT SIDE */
+    .blurb{
+      position: absolute;
+      right: 0;
+      top: 0; /* Same height as left section */
+      width: 400px; /* Fixed width for right content */
+      max-width: calc(100% - 300px); /* Ensure space from left */
+    }
+
+    h2{
+      font-size:40px;
+      margin:0 0 16px 0;
+      font-weight:700;
+      white-space:nowrap;
+      line-height: 1.2;
+    }
+    
+    .blurb p:first-child{
+      margin-top: 0;
+      font-size:18px;
+      line-height:1.6;
+      /* Adjust to align baseline with h2 baseline */
+      padding-top: 25px; /* Moved down even more */
+    }
+    .chips{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      color:var(--muted);
+      font-size:18px;
+    }
+    .blurb p{
+      margin:0 0 12px;
+      font-size:18px;
+      line-height:1.6;
+      word-wrap: break-word; /* Added to prevent text overflow */
+    }
+
+    footer{
+      margin-top:54px;
+      border-top:1px solid #eee;
+      padding-top:18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .rating{display:inline-flex;gap:6px;}
+    .star{font-size:26px;line-height:1;cursor:pointer;color:#bdbdbd;transition:color .15s ease;}
+    .star[data-active="true"]{color:#f5a623;}
+    .note{color:var(--muted);font-size:14px;}
+
+    @media (max-width:860px){
+      header{grid-template-columns:1fr;row-gap:6px;}
+      .right{align-items:flex-start;}
+    }
+    @media (max-width:700px){
+      main{
+        position: static;
+      }
+      .left-section{
+        position: static;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+      .blurb{
+        position: static;
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="grid-container" id="grid"></div>
+  <div class="wrap">
+    <header>
+      <div class="left">
+        <div class="name"><a href="og.html" style="color:inherit;text-decoration:none;">hriday ranka</a></div>
+      </div>
 
-    <script>
-        const gridWidth = 60;
-        const gridHeight = 30;
-        const totalCells = gridWidth * gridHeight;
-        const centerRow = Math.floor(gridHeight / 2);
-        const centerCol = Math.floor(gridWidth / 2);
-        
-        let flashingIntervals = [];
-        let isClickEffectActive = false;
-        
-        const flashingColors = [
-            '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
-            '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
-        ];
-        
-        const rippleColors = [
-            '#00BFFF', '#00FF00', '#FF1493', '#FF8C00',
-            '#9400D3', '#FF0000', '#FFD700', '#00FFFF'
-        ];
-        
-        function generateGrid() {
-            const letters = [];
-            for (let row = 0; row < gridHeight; row++) {
-                for (let col = 0; col < gridWidth; col++) {
-                    if (row % 2 === 0) {
-                        const hriPattern = ['H', 'R', 'I'];
-                        letters.push(hriPattern[col % 3]);
-                    } else {
-                        const dayPattern = ['D', 'A', 'Y'];
-                        letters.push(dayPattern[col % 3]);
-                    }
-                }
-            }
-            return letters;
-        }
-        
-        function calculateDistance(row1, col1, row2, col2) {
-            return Math.sqrt(Math.pow(row2 - row1, 2) + Math.pow(col2 - col1, 2));
-        }
-        
-        function selectFlashingCells() {
-            const excludedPositions = [];
-            const centerStartCol = centerCol - 1;
-            
-            // Exclude center HRIDAY block
-            for (let col = centerStartCol; col <= centerStartCol + 2; col++) {
-                excludedPositions.push((centerRow - 1) * gridWidth + col);
-                excludedPositions.push(centerRow * gridWidth + col);
-            }
-            
-            const availableCells = totalCells - excludedPositions.length;
-            const numFlashing = Math.floor(availableCells * 0.25);
-            const positions = [];
-            
-            while (positions.length < numFlashing) {
-                const pos = Math.floor(Math.random() * totalCells);
-                if (!positions.includes(pos) && !excludedPositions.includes(pos)) {
-                    positions.push(pos);
-                }
-            }
-            
-            return positions;
-        }
-        
-        function createGrid() {
-            const letters = generateGrid();
-            const grid = document.getElementById('grid');
-            
-            for (let i = 0; i < totalCells; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.textContent = letters[i];
-                cell.dataset.index = i;
-                cell.dataset.originalColor = '#606060';
-                
-                const row = Math.floor(i / gridWidth);
-                const col = i % gridWidth;
-                const centerStartCol = centerCol - 1;
-                
-                // Center HRIDAY block
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
-                    cell.classList.add('center-block');
-                    cell.dataset.originalColor = '#FFFFFF';
-                    
-                    if (row === centerRow - 1) {
-                        if (col === centerStartCol) cell.textContent = 'H';
-                        else if (col === centerStartCol + 1) cell.textContent = 'R';
-                        else if (col === centerStartCol + 2) cell.textContent = 'I';
-                    } else {
-                        if (col === centerStartCol) cell.textContent = 'D';
-                        else if (col === centerStartCol + 1) cell.textContent = 'A';
-                        else if (col === centerStartCol + 2) cell.textContent = 'Y';
-                    }
-                }
-                
-                grid.appendChild(cell);
-            }
-        }
-        
-        function clearAllFlashing() {
-            flashingIntervals.forEach(interval => {
-                clearInterval(interval);
-                clearTimeout(interval);
-            });
-            flashingIntervals = [];
-        }
-        
-        function resetAllCellsToOriginal() {
-            const allCells = document.querySelectorAll('.cell');
-            allCells.forEach(cell => {
-                if (!cell.classList.contains('center-block')) {
-                    cell.style.color = cell.dataset.originalColor;
-                    cell.style.textShadow = 'none';
-                    cell.style.transform = '';
-                    cell.classList.remove('ripple-wave', 'ripple-fade');
-                }
-            });
-        }
-        
-        function addFlashingEffect() {
-            clearAllFlashing();
-            
-            const flashingPositions = selectFlashingCells();
-            const allCells = document.querySelectorAll('.cell');
-            
-            flashingPositions.forEach(position => {
-                const cell = allCells[position];
-                if (cell && !cell.classList.contains('center-block')) {
-                    const randomDelay = Math.random() * 3000;
-                    
-                    const delayTimeout = setTimeout(() => {
-                        if (!isClickEffectActive) {
-                            const flashInterval = setInterval(() => {
-                                if (!isClickEffectActive && Math.random() < 0.2) {
-                                    const randomColor = flashingColors[Math.floor(Math.random() * flashingColors.length)];
-                                    const originalColor = cell.dataset.originalColor;
-                                    
-                                    cell.style.color = randomColor;
-                                    cell.style.textShadow = `0 0 5px ${randomColor}`;
-                                    
-                                    setTimeout(() => {
-                                        if (!isClickEffectActive && cell.style.color === randomColor) {
-                                            cell.style.color = originalColor;
-                                            cell.style.textShadow = 'none';
-                                        }
-                                    }, 300);
-                                }
-                            }, 1000);
-                            
-                            flashingIntervals.push(flashInterval);
-                        }
-                    }, randomDelay);
-                    
-                    flashingIntervals.push(delayTimeout);
-                }
-            });
-        }
-        
-        function addClickInteraction() {
-            const allCells = document.querySelectorAll('.cell');
-            
-            allCells.forEach(cell => {
-                const index = parseInt(cell.dataset.index);
-                const row = Math.floor(index / gridWidth);
-                const col = index % gridWidth;
-                const centerStartCol = centerCol - 1;
-                
-                if ((row === centerRow - 1 && col >= centerStartCol && col <= centerStartCol + 2) || 
-                    (row === centerRow && col >= centerStartCol && col <= centerStartCol + 2)) {
-                    
-                    const handleInteraction = (event) => {
-                        event.preventDefault();
-                        if (isClickEffectActive) return;
-                        
-                        isClickEffectActive = true;
-                        clearAllFlashing();
-                        resetAllCellsToOriginal();
-                        createRippleEffect();
-                    };
-                    
-                    cell.addEventListener('click', handleInteraction);
-                    cell.addEventListener('touchstart', handleInteraction);
-                }
-            });
-        }
-        
-        function createRippleEffect() {
-            const allCells = document.querySelectorAll('.cell');
-            const rippleColor = rippleColors[Math.floor(Math.random() * rippleColors.length)];
-            
-            const centerStartCol = centerCol - 1;
-            const rippleCenterRow = centerRow - 0.5;
-            const rippleCenterCol = centerStartCol + 1;
-            
-            const cellsByDistance = {};
-            let maxDistance = 0;
-            
-            allCells.forEach((cell, index) => {
-                if (!cell.classList.contains('center-block')) {
-                    const row = Math.floor(index / gridWidth);
-                    const col = index % gridWidth;
-                    const distance = calculateDistance(rippleCenterRow, rippleCenterCol, row, col);
-                    const roundedDistance = Math.floor(distance * 2) / 2;
-                    
-                    maxDistance = Math.max(maxDistance, roundedDistance);
-                    
-                    if (!cellsByDistance[roundedDistance]) {
-                        cellsByDistance[roundedDistance] = [];
-                    }
-                    cellsByDistance[roundedDistance].push({ cell, row, col });
-                }
-            });
-            
-            Object.keys(cellsByDistance).sort((a, b) => parseFloat(a) - parseFloat(b)).forEach(distance => {
-                const cellsAtDistance = cellsByDistance[distance];
-                const delay = parseFloat(distance) * 40;
-                
-                setTimeout(() => {
-                    cellsAtDistance.forEach(({ cell }) => {
-                        cell.style.color = rippleColor;
-                        cell.style.textShadow = `0 0 10px ${rippleColor}`;
-                        cell.classList.add('ripple-wave');
-                        
-                        setTimeout(() => {
-                            cell.classList.remove('ripple-wave');
-                        }, 200);
-                    });
-                }, delay);
-            });
-            
-            const totalRippleTime = maxDistance * 40 + 300;
-            setTimeout(() => {
-                allCells.forEach(cell => {
-                    if (!cell.classList.contains('center-block')) {
-                        cell.classList.add('ripple-fade');
-                        cell.style.color = cell.dataset.originalColor;
-                        cell.style.textShadow = 'none';
-                        
-                        setTimeout(() => {
-                            cell.classList.remove('ripple-fade');
-                        }, 400);
-                    }
-                });
-                
-                setTimeout(() => {
-                    isClickEffectActive = false;
-                    setTimeout(() => {
-                        addFlashingEffect();
-                    }, 100);
-                }, 500);
-            }, totalRippleTime);
-        }
-        
-        // Initialize
-        createGrid();
-        setTimeout(() => {
-            addFlashingEffect();
-            addClickInteraction();
-        }, 500);
-    </script>
+      <div class="right">
+        <nav class="icons" aria-label="social links">
+          <a class="icon" href="https://www.linkedin.com/in/hridayranka" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <!-- LinkedIn SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 
+              1.146v13.708c0 .633-.526 1.146-1.175 
+              1.146H1.175C.526 16 0 15.487 0 
+              14.854zM4.943 13.394V6.169H2.542v7.225zm-.6-8.212c.837 
+              0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.823 
+              0-1.342.554-1.342 1.248 0 .694.521 1.248 
+              1.327 1.248zM9.251 13.394V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 
+              1.232-.878.869 0 1.216.662 1.216 
+              1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 
+              0-1.845.7-2.165 1.193V6.19h-2.4v7.204z"/>
+            </svg>
+          </a>
+          <a class="icon" href="https://github.com/FruitPnchSamuraiG" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 250" fill="currentColor">
+              <path d="M128 .3C57.3.3 0 57.6 0 
+              128.3c0 56.7 36.7 104.8 87.7 
+              121.8 6.4 1.2 8.7-2.8 
+              8.7-6.3 0-3.1-.1-13.3-.2-24.1-35.7 
+              7.8-43.2-15.1-43.2-15.1-5.8-14.8-14.2-18.7-14.2-18.7-11.6-7.9.9-7.7.9-7.7 
+              12.8.9 19.5 13.2 19.5 
+              13.2 11.4 19.5 30 13.9 37.3 
+              10.6 1.1-8.3 4.4-13.9 8-17.1-28.5-3.2-58.4-14.2-58.4-63.2 
+              0-14 5-25.5 13.2-34.5-1.3-3.2-5.7-16.1 
+              1.2-33.6 0 0 10.7-3.4 35.1 
+              13.2 10.2-2.8 21.1-4.3 
+              31.9-4.4 10.8.1 21.7 1.5 
+              31.9 4.4 24.3-16.6 35-13.2 
+              35-13.2 6.9 17.5 2.5 30.4 
+              1.2 33.6 8.2 9 13.2 20.5 
+              13.2 34.5 0 49.1-29.9 60-58.4 
+              63.1 4.5 3.9 8.5 11.7 8.5 
+              23.6 0 17.1-.2 30.9-.2 
+              35.1 0 3.5 2.3 7.6 8.7 
+              6.3C219.3 233 256 184.9 256 
+              128.3 256 57.6 198.7.3 128 
+              .3z"/>
+            </svg>
+          </a>
+          <a class="icon" href="mailto:hriday.ranka@nyu.edu" aria-label="Email">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2 6c0-1.1.9-2 
+              2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 
+              1-2 2H4a2 2 0 0 1-2-2V6zm2 
+              0 8 5 8-5H4zm16 12V8l-8 
+              5-8-5v10h16z"/>
+            </svg>
+          </a>
+        </nav>
+        <div class="tag">computer scientist??</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="left-section">
+        <h2>a brief introduction</h2>
+        <div class="chips" aria-label="links">
+          <span>simppl → ??</span>
+          <span>nyu courant '27 → ??</span>
+          <span>bom · nyc → ??</span>
+        </div>
+      </section>
+
+      <section class="blurb">
+        <p>right now im trying my best to find a singular objective to devote all possible time to, the top candidates seem to be reinforcement learning, rust, and ricing arch linux.</p>
+        <p>ive been stuck on fixing the sleep configuration for my arch setup for quite a while now</p>
+        <p>before beginning my ms i was a research engineer, i worked on problems associated with bringing about trust and transparency on social media platforms; i worked on disinformation analysis on telegram for the majority of my time and right now im just trying to find where i belong</p>
+      </section>
+    </main>
+  </div>
 </body>
 </html>

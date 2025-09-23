@@ -153,8 +153,15 @@
     .note{color:var(--muted);font-size:14px;}
 
     @media (max-width:860px){
-      header{grid-template-columns:1fr;row-gap:6px;}
-      .right{align-items:flex-start;}
+      header {
+        flex-direction: column;   /* stack left and right vertically */
+        align-items: flex-start;  /* align everything to the left */
+        gap: 12px;                /* optional spacing between name and right section */
+      }
+      .right {
+        align-items: flex-start;  /* keep icons and tag stacked nicely */
+        margin-top: 0;            /* remove any vertical translation if applied */
+      }
     }
     @media (max-width:700px){
       main{
@@ -177,7 +184,7 @@
   <div class="wrap">
     <header>
       <div class="left">
-        <div class="name" style="margin-left: -6px;">hriday ranka</div>
+        <div class="name" style="margin-left: -5px;">hriday ranka</div>
       </div>
 
       <div class="right">
@@ -240,7 +247,7 @@
 
 
         </nav>
-        <div class="tag">CS grad student</div>
+        <div class="tag">CS Grad Student</div>
       </div>
     </header>
 

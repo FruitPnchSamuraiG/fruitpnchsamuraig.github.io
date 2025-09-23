@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>hriday ranka</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Computer Science Graduate Student" />
   <style>
     :root{
@@ -22,19 +23,25 @@
     .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 16px;}
 
     header{
-      display:grid;
-      grid-template-columns:1fr auto;
-      align-items:baseline;
-      column-gap:18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline; /* This ensures baseline alignment */
       margin-bottom:34px;
+      position:relative;
     }
-    .left{display:flex;flex-direction:column;align-items:flex-start;}
+    .left{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+    }
     .name{
       font-size:var(--name-size);
       font-weight:650;
       letter-spacing:-0.02em;
-      line-height:0.9;
+      line-height:1;
       white-space:nowrap;
+      margin:0;
+      padding:0;
     }
     .icons{
       display:flex;
@@ -42,11 +49,26 @@
       align-items:center;
       margin-top:8px;
       color:rgba(0,0,0,0.45);
+      transform:translateY(-12px);
     }
     .icon{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;}
     .icon svg{width:100%;height:100%;}
-    .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-    .tag{font-size:16px;color:var(--muted);white-space:nowrap;}
+    .right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:0;
+    }
+    .tag{
+      font-size:16px;
+      color:var(--muted);
+      white-space:nowrap;
+      margin:0;
+      padding:0;
+      line-height:1;
+      /* Manually adjust to match name baseline */
+      transform:translateY(-8px);
+    }
 
     /* Main layout - FIXED */
     main{
@@ -55,7 +77,7 @@
       min-height: 200px;
     }
 
-    /* Left section */
+    /* Left section - Fixed alignment */
     .left-section{
       position: absolute;
       left: 0;
@@ -67,25 +89,26 @@
     .blurb{
       position: absolute;
       right: 0;
-      top: 0; /* Same height as left section */
-      width: 400px; /* Fixed width for right content */
-      max-width: calc(100% - 300px); /* Ensure space from left */
+      top: 0;
+      width: 400px;
+      max-width: calc(100% - 300px);
     }
 
+    /* Fix h2 alignment with name */
     h2{
       font-size:40px;
-      margin:0 0 16px 0;
+      margin:0 0 16px 0; /* Remove top margin */
       font-weight:700;
       white-space:nowrap;
-      line-height: 1.2;
+      line-height: 0.9; /* Match the name's line height */
     }
     
     .blurb p:first-child{
       margin-top: 0;
       font-size:18px;
       line-height:1.6;
-      /* Adjust to align baseline with h2 baseline */
-      padding-top: 25px; /* Moved down even more */
+      /* Remove the padding-top to align with h2 baseline */
+      padding-top: 0;
     }
     .chips{
       display:flex;
@@ -98,7 +121,7 @@
       margin:0 0 12px;
       font-size:18px;
       line-height:1.6;
-      word-wrap: break-word; /* Added to prevent text overflow */
+      word-wrap: break-word;
     }
 
     footer{
@@ -141,7 +164,7 @@
   <div class="wrap">
     <header>
       <div class="left">
-        <div class="name">hriday ranka</div>
+        <div class="name" style="margin-left: -6px;">hriday ranka</div>
       </div>
 
       <div class="right">
@@ -197,13 +220,13 @@
             </svg>
           </a>
         </nav>
-        <div class="tag">computer scientist??</div>
+        <div class="tag">CS grad student</div>
       </div>
     </header>
 
     <main>
       <section class="left-section">
-        <h2>  a brief introduction</h2>
+       <h2>a brief introduction</h2>
         <div class="chips" aria-label="links">
           <span>simppl → ??</span>
           <span>nyu courant '27 → ??</span>

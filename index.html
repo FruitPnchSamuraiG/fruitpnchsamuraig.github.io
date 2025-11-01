@@ -136,6 +136,23 @@
       line-height:1.6;
       word-wrap: break-word;
     }
+    .cv-link {
+  font-size: 25px; /* Matches h2 size */
+  font-weight: 800; /* Matches h2 weight */
+  font-style: italic;
+  font-family: 'Brush Script MT'; 
+  color: inherit; /* Matches h2 color */
+  text-decoration: none;
+  transition: color 0.2s ease;
+  transition: color 0.2s ease;
+  vertical-align: baseline; /* Aligns to text baseline */
+  position: relative;
+  top: -2px; /* Adjust this value - try -2px to -5px */
+}
+
+.cv-link:hover {
+  text-decoration: underline;
+}
   .ascii-display {
   font-family: 'Courier New', monospace;
   font-size: 4px;
@@ -284,7 +301,7 @@
 
     <main>
       <section class="left-section">
-       <h2>a brief introduction</h2>
+       <h2>a brief introduction <a href="cv.pdf" target="_blank" class="cv-link">[CV]</a></h2>
         <div class="chips" aria-label="links">
           <span>simppl '23-'24 → ??</span>
           <span>nyu courant '27 → ??</span>

@@ -21,6 +21,22 @@
     }
     a{color:inherit;text-decoration:none;}
     a:hover{text-decoration:underline;}
+    
+    .banner {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    .banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
     .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 16px;}
 
     header{
@@ -169,7 +185,18 @@
   padding-top: 0;
   /* This crops 50px worth of content from the top */
   clip-path: inset(50px 0 0 0);
-    } 
+    }
+  .profile-image {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin-top: 16px;
+  display: block;
+  border-radius: 1px; /* optional: adds slight rounded corners */
+  transform: scale(1.45); /* Change this number: 0.5 = 50%, 1.5 = 150%, etc. */
+  transform-origin: top left;
+  margin-bottom: 170px
+  }
     footer{
       margin-top:54px;
       border-top:1px solid #eee;
@@ -195,6 +222,9 @@
         align-items: flex-start;  /* keep icons and tag stacked nicely */
         margin-top: 0;            /* remove any vertical translation if applied */
       }
+      .banner {
+        height: 150px;
+      }
     }
     
     @media (max-width:700px){
@@ -210,6 +240,9 @@
         position: static;
         width: 100%;
         max-width: 100%;
+      }
+      .banner {
+        height: 120px;
       }
     }
     @media (max-width:768px) and (orientation:portrait){
@@ -229,6 +262,9 @@
   </style>
 </head>
 <body>
+  <div class="banner">
+    <img src="banner.webp" alt="Banner">
+  </div>
   <div class="wrap">
     <header>
       <div class="left">
@@ -307,8 +343,10 @@
           <span>nyu courant '27 → ??</span>
           <span>bom · nyc → ??</span>
         </div>
-
+        <!--
         <pre id="ascii-art" class="ascii-display"></pre>
+          -->
+        <img src="test.jpg" alt="Profile" class="profile-image">
       </section>
 
       <section class="blurb">
@@ -324,12 +362,14 @@
     </main>
   </div>
   <script>
+  /*
   fetch('ascii.txt')
     .then(response => response.text())
     .then(text => {
       document.getElementById('ascii-art').textContent = text;
     })
     .catch(err => console.log('ASCII art not found'));
+  */
   </script>
   <!--I modeled this site after Michael Yan's website (https://michaelyan.com/) -->
 

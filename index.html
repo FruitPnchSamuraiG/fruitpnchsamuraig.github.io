@@ -36,6 +36,24 @@
       object-position: center;
       display: block;
     }
+    .banner-quote {
+  text-align: center;
+  font-style: italic;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 24px;
+  color: #000;
+  margin: 24px auto;
+  max-width: var(--maxw);
+  padding: 0 16px;
+}
+
+.banner-quote::before {
+  content: '"';
+}
+
+.banner-quote::after {
+  content: '"';
+}
 
     .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 16px;}
 
@@ -179,7 +197,7 @@
   color: #000;
   font-weight: 500;
   width: fit-content;
-  transform: scale(1);
+  transform: scale(0.8);
   transform-origin: top left;
   margin-bottom: 10px;
   padding-top: 0;
@@ -264,6 +282,9 @@
 <body>
   <div class="banner">
     <img src="banner.webp" alt="Banner">
+  </div>
+  <div class="banner-quote">
+    firm faith in hard work and consistent self improvement
   </div>
   <div class="wrap">
     <header>

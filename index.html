@@ -138,11 +138,16 @@
       line-height: 0.9;
     }
     
-    .blurb p:first-child{
-      margin-top: 0; /* Align first paragraph with h2 */
+    .blurb p{
+      margin:0 0 12px;
       font-size:18px;
       line-height:1.6;
-      padding-top: 0;
+      word-wrap: break-word;
+      text-align: justify;
+    }
+    
+    .blurb p:first-of-type{
+      margin-top: 0;
     }
     .chips{
       display:flex;
@@ -254,7 +259,7 @@
       
       .profile-image {
         max-width: 180px;
-        transform: scale(1);
+        transform: scale(1.1);
         margin-bottom: 0;
       }
       
@@ -331,7 +336,7 @@
           <span>nyu courant '27 → ??</span>
           <span>bom · nyc → ??</span>
         </div>
-        <img src="test2.jpg" alt="Profile" class="profile-image">
+        <img src="test4.jpg" alt="Profile" class="profile-image">
       </section>
 
       <section class="blurb">
